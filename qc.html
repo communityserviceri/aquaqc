@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLANTIS QC Enterprise - Cloud System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --accent: #0ea5e9;
+            --accent-hover: #0284c7;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-dim: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 280px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.02);
+            z-index: 10;
+        }
+        .brand-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--accent);
+            text-align: center;
+            letter-spacing: -1px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .brand-logo span { color: var(--text-main); }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            color: var(--text-dim);
+            text-decoration: none;
+            border-radius: 14px;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .nav-link i { font-size: 18px; width: 25px; text-align: center; }
+        .nav-link.active, .nav-link:hover { background: #f0f9ff; color: var(--accent); }
+        .main-content {
+            flex: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        .page { display: none; animation: slideUp 0.4s ease-out; }
+        .page.active { display: block; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .header-section { margin-bottom: 35px; }
+        .header-section h1 { font-size: 32px; font-weight: 800; margin: 0; color: var(--text-main); }
+        .header-section p { color: var(--text-dim); font-size: 16px; margin-top: 8px; }
+        .card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+        .card h3 {
+            margin: 0 0 25px 0; font-size: 18px; font-weight: 700;
+            display: flex; align-items: center; gap: 12px; color: var(--text-main);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .input-wrapper label {
+            display: block; font-size: 11px; font-weight: 800;
+            color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        input, select {
+            width: 100%; padding: 14px; border: 1.5px solid var(--border);
+            border-radius: 14px; font-family: inherit; font-size: 14px; transition: 0.3s;
+            box-sizing: border-box; background: #fff;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
+        .qc-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .qc-btn {
+            padding: 15px 10px; border-radius: 12px; border: 1.5px solid var(--border);
+            text-align: center; cursor: pointer; transition: 0.3s; font-size: 13px; font-weight: 600;
+        }
+        .qc-btn input { display: none; }
+        .qc-btn:hover { border-color: var(--accent); background: #f0f9ff; }
+        .qc-btn.selected[data-val="1"] { background: #dcfce7; border-color: var(--success); color: #166534; }
+        .qc-btn.selected[data-val="0.7"] { background: #fef9c3; border-color: var(--warning); color: #854d0e; }
+        .qc-btn.selected[data-val="0.4"] { background: #fee2e2; border-color: var(--danger); color: #991b1b; }
+        .qc-btn.selected[data-val="0"] { background: #1e293b; border-color: #000; color: #fff; }
+        .db-toolbar {
+            display: flex; gap: 15px; margin-bottom: 20px; align-items: center;
+            background: #f1f5f9; padding: 15px; border-radius: 18px; flex-wrap: wrap;
+        }
+        .db-nav { display: flex; background: #fff; padding: 5px; border-radius: 12px; border: 1px solid var(--border); }
+        .db-nav-btn {
+            padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700;
+            cursor: pointer; border: none; background: transparent; color: var(--text-dim); transition: 0.2s;
+        }
+        .db-nav-btn.active { background: var(--accent); color: white; }
+        .table-container { max-height: 600px; overflow-y: auto; border-radius: 15px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        thead { position: sticky; top: 0; z-index: 5; }
+        th { 
+            background: #f8fafc; text-align: left; padding: 15px 20px; 
+            color: var(--text-dim); font-size: 11px; text-transform: uppercase; 
+            letter-spacing: 1px; border-bottom: 2px solid var(--border);
+        }
+        td { padding: 16px 20px; background: white; border-bottom: 1px solid var(--border); font-size: 14px; }
+        tr:hover td { background: #f0f9ff; cursor: pointer; }
+        #detailModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); z-index: 100; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .btn {
+            padding: 16px 30px; border-radius: 16px; font-weight: 700;
+            cursor: pointer; border: none; transition: 0.3s; font-family: inherit;
+            display: inline-flex; align-items: center; gap: 10px; font-size: 15px;
+        }
+        .btn-primary { background: var(--accent); color: white; box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3); }
+        .btn-secondary { background: #e2e8f0; color: var(--text-main); }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .badge { padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 11px; display: inline-block; }
+        .badge-A { background: #dcfce7; color: #166534; }
+        .badge-B { background: #fef9c3; color: #854d0e; }
+        .badge-C { background: #fee2e2; color: #991b1b; }
+        .grade-display { font-size: 120px; font-weight: 900; line-height: 1; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="brand-logo"><i class="fas fa-shield-virus"></i> ATLANTIS<span>QC</span></div>
+        <div class="nav-link active" onclick="showPage('formPage', this)"><i class="fas fa-plus-square"></i> New Inspection</div>
+        <div class="nav-link" onclick="showPage('historyPage', this)"><i class="fas fa-database"></i> Cloud Database</div>
+        <div class="nav-link" onclick="showPage('statsPage', this)"><i class="fas fa-chart-pie"></i> Analytics</div>
+        <div style="margin-top: auto; padding: 20px; background: #f8fafc; border-radius: 20px; border: 1px solid var(--border);">
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-dim); margin-bottom: 5px;">SERVER STATUS</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--success);">
+                <i class="fas fa-circle" style="font-size: 8px;"></i> Connected
+            </div>
+        </div>
+    </nav>
+    <main class="main-content">
+        <div id="formPage" class="page active">
+            <div class="header-section">
+                <h1>Unit Inspection</h1>
+                <p>Standard Operating Procedure (SOP) for Laptop Quality Control.</p>
+            </div>
+            <div id="qcInputArea">
+                <div class="card">
+                    <h3><i class="fas fa-info-circle"></i> Unit Specifications</h3>
+                    <div class="form-grid">
+                        <div class="input-wrapper"><label>Brand</label>
+                            <select id="brand">
+                                <option value="Lenovo">Lenovo</option>
+                                <option value="Dell">Dell</option>
+                                <option value="HP">HP</option>
+                                <option value="Asus">Asus</option>
+                                <option value="Apple">Apple</option>
+                                <option value="Acer">Acer</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="input-wrapper"><label>Model Name</label><input id="nama" placeholder="e.g. ThinkPad X1 Carbon"></div>
+                        <div class="input-wrapper"><label>Serial Number</label><input id="sn" placeholder="Unique ID"></div>
+                        <div class="input-wrapper"><label>CPU</label><input id="cpu" placeholder="Intel i7-1260P"></div>
+                        <div class="input-wrapper"><label>RAM</label><input id="ram" placeholder="16GB DDR4"></div>
+                        <div class="input-wrapper"><label>Storage</label><input id="ssd" placeholder="512GB NVMe"></div>
+                        <div class="input-wrapper"><label>Inspector</label><input id="teknisi" placeholder="Technician Name"></div>
+                        <div class="input-wrapper"><label>Date</label><input id="tanggal" type="date"></div>
+                    </div>
+                </div>
+                <div id="dynamicQC"></div>
+                <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="processQC()">
+                    FINALIZE & SAVE TO CLOUD <i class="fas fa-check-double"></i>
+                </button>
+            </div>
+            <div id="resultArea" style="display:none;">
+                <div class="card" style="text-align: center; padding: 60px;">
+                    <h3 style="justify-content: center;">Final Quality Result</h3>
+                    <div class="grade-display" id="finalGrade">-</div>
+                    <p id="finalScore" style="font-size: 20px; font-weight: 700; color: var(--text-dim);"></p>
+                    <div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px;">
+                        <button class="btn btn-primary" onclick="generatePerfectPDF()"><i class="fas fa-file-pdf"></i> Export Certificate</button>
+                        <button class="btn btn-secondary" onclick="location.reload()">Inspect Another Unit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="historyPage" class="page">
+            <div class="header-section">
+                <h1>Cloud Database</h1>
+                <p>Enterprise data management & inspection archives.</p>
+            </div>
+            <div class="db-toolbar">
+                <div class="input-wrapper" style="flex: 1; min-width: 250px;">
+                    <input type="text" id="dbSearch" placeholder="Search S/N, Model, or Technician..." onkeyup="runComplexFilter()">
+                </div>
+                <div class="db-nav">
+                    <button class="db-nav-btn active" onclick="filterByGrade('ALL', this)">ALL</button>
+                    <button class="db-nav-btn" onclick="filterByGrade('A+', this)">A+</button>
+                    <button class="db-nav-btn" onclick="filterByGrade('A', this)">A</button>
+                    <button class="db-nav-btn" onclick="filterByGrade('B', this)">B</button>
+                    <button class="db-nav-btn" onclick="filterByGrade('C', this)">C</button>
+                </div>
+                <select id="filterBrand" style="width: auto; padding: 8px 15px;" onchange="runComplexFilter()">
+                    <option value="ALL">All Brands</option>
+                    <option value="Lenovo">Lenovo</option>
+                    <option value="Dell">Dell</option>
+                    <option value="HP">HP</option>
+                    <option value="Asus">Asus</option>
+                    <option value="Apple">Apple</option>
+                </select>
+            </div>
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Brand</th>
+                                <th>Model / Series</th>
+                                <th>Serial Number</th>
+                                <th>Inspector</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="statsPage" class="page">
+            <div class="header-section">
+                <h1>Performance Analytics</h1>
+            </div>
+            <div class="form-grid">
+                <div class="card" style="text-align: center;">
+                    <p style="color:var(--text-dim); font-weight: 700;">TOTAL INSPECTED</p>
+                    <h1 id="statTotal" style="font-size: 48px; color: var(--accent);">0</h1>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <p style="color:var(--text-dim); font-weight: 700;">AVG. QUALITY SCORE</p>
+                    <h1 id="statAvg" style="font-size: 48px; color: var(--success);">0</h1>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <p style="color:var(--text-dim); font-weight: 700;">GRADE A RATE</p>
+                    <h1 id="statRate" style="font-size: 48px; color: var(--warning);">0%</h1>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="detailModal">
+        <div class="card" style="width: 90%; max-width: 850px; max-height: 90vh; overflow-y: auto; position: relative; border-radius: 30px;">
+            <button onclick="closeModal()" style="position:absolute; right:25px; top:25px; border:none; background:#f1f5f9; width:40px; height:40px; border-radius:50%; cursor:pointer;"><i class="fas fa-times"></i></button>
+            <h3 style="font-size: 22px;"><i class="fas fa-edit" style="color:var(--accent)"></i> Unit Detail & Update</h3>
+            <hr style="border:0; border-top:1px solid var(--border); margin-bottom:30px;">
+            <div class="form-grid" id="modalForm">
+                <input type="hidden" id="editId">
+                <div class="input-wrapper"><label>Brand</label><input id="editBrand"></div>
+                <div class="input-wrapper"><label>Model</label><input id="editNama"></div>
+                <div class="input-wrapper"><label>Serial Number</label><input id="editSn" readonly style="background:#f1f5f9; cursor:not-allowed;"></div>
+                <div class="input-wrapper"><label>CPU</label><input id="editCpu"></div>
+                <div class="input-wrapper"><label>RAM</label><input id="editRam"></div>
+                <div class="input-wrapper"><label>Storage</label><input id="editSsd"></div>
+                <div class="input-wrapper"><label>Inspector</label><input id="editTeknisi"></div>
+                <div class="input-wrapper"><label>Score (0-100)</label><input id="editScore" type="number"></div>
+                <div class="input-wrapper"><label>Grade</label><input id="editGrade"></div>
+                <div class="input-wrapper"><label>Inspection Date</label><input id="editTanggal" type="date"></div>
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 40px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid var(--border);">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                <button class="btn btn-primary" style="background:var(--success)" onclick="updateCloudData()"><i class="fas fa-cloud-upload-alt"></i> Save Changes</button>
+                <button class="btn btn-primary" onclick="downloadFromModal()"><i class="fas fa-print"></i> Re-print PDF</button>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxZvpKrQ236bCTOLSzoMrHRR8BINTI-Sw",
+            authDomain: "atlantiscorp-af211.firebaseapp.com",
+            projectId: "atlantiscorp-af211",
+            storageBucket: "atlantiscorp-af211.firebasestorage.app",
+            messagingSenderId: "36612462515",
+            appId: "1:36612462515:web:7683c3b686d308450addc6"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let allDataCache = [];
+        let currentGradeFilter = 'ALL';
+        const sections = [
+            { id: "phys", name: "Physical Body & Hinge", weight: 15, icon: "fa-laptop" },
+            { id: "disp", name: "Display / Screen Panel", weight: 20, icon: "fa-tv" },
+            { id: "kybd", name: "Keyboard Responsiveness", weight: 10, icon: "fa-keyboard" },
+            { id: "tp",   name: "Trackpad & Click Buttons", weight: 10, icon: "fa-mouse-pointer" },
+            { id: "port", name: "I/O Ports (USB, HDMI, Jack)", weight: 10, icon: "fa-plug" },
+            { id: "batt", name: "Battery Health & Cycle", weight: 15, icon: "fa-battery-three-quarters" },
+            { id: "perf", name: "System Performance & Heat", weight: 20, icon: "fa-microchip" }
+        ];
+        const qcContainer = document.getElementById("dynamicQC");
+        sections.forEach((s, idx) => {
+            let html = `<div class="card"><h3><i class="fas ${s.icon}"></i> ${s.name}</h3><div class="qc-selector">`;
+            [{l:"Excellent",v:1},{l:"Good",v:0.7},{l:"Fair",v:0.4},{l:"Fail",v:0}].forEach(o => {
+                html += `<div class="qc-btn" data-val="${o.v}" onclick="window.selectQC(this, ${idx})"><input type="radio" name="sec_${idx}" value="${o.v}">${o.l}</div>`;
+            });
+            html += `</div></div>`;
+            qcContainer.innerHTML += html;
+        });
+        document.getElementById('tanggal').valueAsDate = new Date();
+        window.selectQC = (el, idx) => {
+            el.parentElement.querySelectorAll('.qc-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            el.querySelector('input').checked = true;
+        };
+        window.showPage = (id, navEl) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            navEl.classList.add('active');
+            if(id === 'historyPage') loadCloudData();
+            if(id === 'statsPage') loadStats();
+        };
+        window.processQC = async () => {
+            const brand = document.getElementById("brand").value;
+            const model = document.getElementById("nama").value;
+            const sn = document.getElementById("sn").value;
+            if(!model || !sn) return alert("Fill Brand, Model and SN!");
+            let score = 0, count = 0;
+            sections.forEach((s, i) => {
+                const checked = document.querySelector(`input[name="sec_${i}"]:checked`);
+                if(checked) { score += parseFloat(checked.value) * s.weight; count++; }
+            });
+            if(count < sections.length) return alert("Assess all sections!");
+            const grade = score >= 90 ? "A+" : score >= 80 ? "A" : score >= 70 ? "B" : "C";
+            const data = {
+                brand, model, sn, grade, score: score.toFixed(1),
+                cpu: document.getElementById("cpu").value,
+                ram: document.getElementById("ram").value,
+                ssd: document.getElementById("ssd").value,
+                teknisi: document.getElementById("teknisi").value,
+                tanggal: document.getElementById("tanggal").value,
+                createdAt: serverTimestamp()
+            };
+            try {
+                await addDoc(collection(db, "inspections"), data);
+                document.getElementById("finalGrade").innerText = grade;
+                document.getElementById("finalGrade").style.color = grade.includes('A') ? 'var(--success)' : 'var(--warning)';
+                document.getElementById("finalScore").innerText = `Integrity Score: ${data.score} / 100`;
+                document.getElementById("qcInputArea").style.display = "none";
+                document.getElementById("resultArea").style.display = "block";
+            } catch (e) { alert("Save failed: " + e); }
+        };
+        async function loadCloudData() {
+            const snapshot = await getDocs(query(collection(db, "inspections"), orderBy("createdAt", "desc")));
+            const tbody = document.getElementById("historyTbody");
+            tbody.innerHTML = "";
+            allDataCache = [];
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                const id = doc.id;
+                allDataCache.push({id, ...d});
+                const tr = document.createElement("tr");
+                tr.setAttribute('data-brand', d.brand);
+                tr.setAttribute('data-grade', d.grade);
+                tr.onclick = () => openDetail(id);
+                tr.innerHTML = `
+                    <td>${d.tanggal}</td>
+                    <td><span class="badge" style="background:#f1f5f9; color:#475569">${d.brand}</span></td>
+                    <td><strong>${d.model}</strong></td>
+                    <td><code>${d.sn}</code></td>
+                    <td>${d.teknisi || '-'}</td>
+                    <td style="font-weight:700">${d.score}</td>
+                    <td><span class="badge badge-${d.grade[0]}">${d.grade}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            window.runComplexFilter();
+        }
+        window.openDetail = (id) => {
+            const item = allDataCache.find(x => x.id === id);
+            if(!item) return;
+            document.getElementById("editId").value = id;
+            document.getElementById("editBrand").value = item.brand;
+            document.getElementById("editNama").value = item.model;
+            document.getElementById("editSn").value = item.sn;
+            document.getElementById("editCpu").value = item.cpu;
+            document.getElementById("editRam").value = item.ram;
+            document.getElementById("editSsd").value = item.ssd;
+            document.getElementById("editTeknisi").value = item.teknisi;
+            document.getElementById("editScore").value = item.score;
+            document.getElementById("editGrade").value = item.grade;
+            document.getElementById("editTanggal").value = item.tanggal;
+            document.getElementById("detailModal").style.display = "flex";
+        };
+        window.closeModal = () => document.getElementById("detailModal").style.display = "none";
+        window.updateCloudData = async () => {
+            const id = document.getElementById("editId").value;
+            try {
+                await updateDoc(doc(db, "inspections", id), {
+                    brand: document.getElementById("editBrand").value,
+                    model: document.getElementById("editNama").value,
+                    cpu: document.getElementById("editCpu").value,
+                    ram: document.getElementById("editRam").value,
+                    ssd: document.getElementById("editSsd").value,
+                    teknisi: document.getElementById("editTeknisi").value,
+                    score: document.getElementById("editScore").value,
+                    grade: document.getElementById("editGrade").value,
+                    tanggal: document.getElementById("editTanggal").value
+                });
+                alert("Cloud Sync Successful!");
+                closeModal();
+                loadCloudData();
+            } catch (e) { alert("Update Error: " + e); }
+        };
+        window.filterByGrade = (g, btn) => {
+            currentGradeFilter = g;
+            document.querySelectorAll('.db-nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            window.runComplexFilter();
+        };
+        window.runComplexFilter = () => {
+            const search = document.getElementById("dbSearch").value.toUpperCase();
+            const brand = document.getElementById("filterBrand").value.toUpperCase();
+            document.querySelectorAll("#historyTbody tr").forEach(row => {
+                const textMatch = row.innerText.toUpperCase().includes(search);
+                const brandMatch = brand === 'ALL' || row.getAttribute('data-brand').toUpperCase() === brand;
+                const gradeMatch = currentGradeFilter === 'ALL' || row.getAttribute('data-grade') === currentGradeFilter;
+                row.style.display = (textMatch && brandMatch && gradeMatch) ? "" : "none";
+            });
+        };
+        const drawSertifikat = (doc, data) => {
+            const navy = [15, 23, 42], sky = [14, 165, 233];
+            doc.setFillColor(...navy); doc.rect(0, 0, 210, 45, 'F');
+            doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(24);
+            doc.text("ATLANTIS", 20, 20); doc.setFont("helvetica", "normal"); doc.text("SYSTEMS", 65, 20);
+            doc.setFontSize(10); doc.text("OFFICIAL QUALITY CONTROL REPORT", 20, 30);
+            doc.text("SN: " + data.sn, 150, 20);
+            doc.setDrawColor(...sky); doc.setLineWidth(1); doc.line(20, 35, 190, 35);
+            doc.setTextColor(...navy); doc.setFontSize(14); doc.text("Device Specification", 20, 60);
+            doc.autoTable({
+                startY: 65, body: [
+                    ["Brand", data.brand], ["Model", data.model], ["CPU", data.cpu],
+                    ["RAM", data.ram], ["Storage", data.ssd], ["Inspection Date", data.tanggal]
+                ], theme: 'grid', styles: { fontSize: 10, cellPadding: 5 }, 
+                columnStyles: { 0: { fontStyle: 'bold', fillColor: [248, 250, 252], cellWidth: 50 } }
+            });
+            const finalY = doc.lastAutoTable.finalY + 15;
+            doc.setFillColor(240, 249, 255); doc.roundedRect(20, finalY, 170, 35, 3, 3, 'F');
+            doc.setFontSize(11); doc.text("Quality Grade", 30, finalY + 12);
+            doc.setFontSize(28); doc.setTextColor(...sky); doc.text(data.grade, 30, finalY + 28);
+            doc.setTextColor(...navy); doc.setFontSize(11); doc.text("Integrity Score", 100, finalY + 12);
+            doc.setFontSize(22); doc.text(data.score + " / 100", 100, finalY + 28);
+            const sigY = finalY + 60;
+            doc.setTextColor(...navy); doc.setFontSize(10);
+            doc.setFont("helvetica", "bold"); doc.text("Authorized Technician,", 20, sigY);
+            doc.setDrawColor(200); doc.setLineWidth(0.5); doc.line(20, sigY + 22, 75, sigY + 22);
+            doc.setFont("helvetica", "normal"); doc.text(data.teknisi || "...........................", 20, sigY + 28);
+            doc.setFont("helvetica", "bold"); doc.text("Business Owner / Manager,", 130, sigY);
+            doc.setDrawColor(200); doc.line(130, sigY + 22, 185, sigY + 22);
+            doc.setFont("helvetica", "normal"); doc.text("ATLANTIS OFFICIAL", 130, sigY + 28);
+            doc.setFontSize(8); doc.setTextColor(150);
+            doc.text("This document is a valid proof of inspection from Atlantis Systems Cloud Database.", 105, 285, null, null, "center");
+            doc.text("Data Integrity Secured by Firebase Encryption.", 105, 290, null, null, "center");
+            doc.save(`QC_OFFICIAL_${data.brand}_${data.sn}.pdf`);
+        };
+        window.generatePerfectPDF = () => {
+            drawSertifikat(new window.jspdf.jsPDF(), {
+                brand: document.getElementById("brand").value,
+                model: document.getElementById("nama").value,
+                sn: document.getElementById("sn").value,
+                cpu: document.getElementById("cpu").value,
+                ram: document.getElementById("ram").value,
+                ssd: document.getElementById("ssd").value,
+                teknisi: document.getElementById("teknisi").value,
+                grade: document.getElementById("finalGrade").innerText,
+                score: document.getElementById("finalScore").innerText.split(':')[1].trim().split('/')[0].trim(),
+                tanggal: document.getElementById("tanggal").value
+            });
+        };
+        window.downloadFromModal = () => {
+            drawSertifikat(new window.jspdf.jsPDF(), {
+                brand: document.getElementById("editBrand").value,
+                model: document.getElementById("editNama").value,
+                sn: document.getElementById("editSn").value,
+                cpu: document.getElementById("editCpu").value,
+                ram: document.getElementById("editRam").value,
+                ssd: document.getElementById("editSsd").value,
+                teknisi: document.getElementById("editTeknisi").value,
+                grade: document.getElementById("editGrade").value,
+                score: document.getElementById("editScore").value,
+                tanggal: document.getElementById("editTanggal").value
+            });
+        };
+        async function loadStats() {
+            const snap = await getDocs(collection(db, "inspections"));
+            let total = snap.size, sum = 0, aCount = 0;
+            snap.forEach(d => {
+                const data = d.data();
+                sum += parseFloat(data.score);
+                if(data.grade.includes('A')) aCount++;
+            });
+            document.getElementById("statTotal").innerText = total;
+            document.getElementById("statAvg").innerText = total ? (sum/total).toFixed(1) : 0;
+            document.getElementById("statRate").innerText = total ? Math.round((aCount/total)*100) + "%" : "0%";
+        }
+    </script>
+</body>
+</html>
