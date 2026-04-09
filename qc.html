@@ -188,12 +188,39 @@
                     <div class="form-grid">
                         <div class="input-wrapper"><label>Brand</label>
                             <select id="brand">
-                                <option value="Lenovo">Lenovo</option>
-                                <option value="Dell">Dell</option>
-                                <option value="HP">HP</option>
-                                <option value="Asus">Asus</option>
-                                <option value="Apple">Apple</option>
-                                <option value="Acer">Acer</option>
+                                <optgroup label="Global Brands">
+                                    <option value="Asus">Asus</option>
+                                    <option value="Acer">Acer</option>
+                                    <option value="Lenovo">Lenovo</option>
+                                    <option value="HP">HP</option>
+                                    <option value="Dell">Dell</option>
+                                    <option value="Apple">Apple</option>
+                                    <option value="MSI">MSI</option>
+                                    <option value="Samsung">Samsung</option>
+                                    <option value="Huawei">Huawei</option>
+                                    <option value="Xiaomi">Xiaomi</option>
+                                    <option value="Microsoft">Microsoft</option>
+                                    <option value="LG">LG</option>
+                                    <option value="Fujitsu">Fujitsu</option>
+                                    <option value="Dynabook">Dynabook (Toshiba)</option>
+                                    <option value="Gigabyte">Gigabyte</option>
+                                    <option value="Razer">Razer</option>
+                                    <option value="Honor">Honor</option>
+                                    <option value="Infinix">Infinix</option>
+                                    <option value="Realme">Realme</option>
+                                    <option value="Google">Google (Chromebook)</option>
+                                </optgroup>
+                                <optgroup label="Local Brands (Indonesia)">
+                                    <option value="Axioo">Axioo</option>
+                                    <option value="Advan">Advan</option>
+                                    <option value="Zyrex">Zyrex</option>
+                                    <option value="Polytron">Polytron</option>
+                                    <option value="Byon">Byon</option>
+                                    <option value="Xenom">Xenom</option>
+                                    <option value="Evercoss">Evercoss</option>
+                                    <option value="SPC">SPC</option>
+                                    <option value="TSM">TSM Technologies</option>
+                                </optgroup>
                                 <option value="Other">Other</option>
                             </select>
                         </div>
@@ -202,6 +229,7 @@
                         <div class="input-wrapper"><label>CPU</label><input id="cpu" placeholder="Intel i7-1260P"></div>
                         <div class="input-wrapper"><label>RAM</label><input id="ram" placeholder="16GB DDR4"></div>
                         <div class="input-wrapper"><label>Storage</label><input id="ssd" placeholder="512GB NVMe"></div>
+                        <div class="input-wrapper"><label>OS Installed</label><input id="os" placeholder="Windows 11 Pro / macOS Sonoma"></div>
                         <div class="input-wrapper"><label>Inspector</label><input id="teknisi" placeholder="Technician Name"></div>
                         <div class="input-wrapper"><label>Date</label><input id="tanggal" type="date"></div>
                     </div>
@@ -246,6 +274,8 @@
                     <option value="HP">HP</option>
                     <option value="Asus">Asus</option>
                     <option value="Apple">Apple</option>
+                    <option value="Axioo">Axioo</option>
+                    <option value="Advan">Advan</option>
                 </select>
             </div>
             <div class="card" style="padding: 0; overflow: hidden;">
@@ -300,6 +330,7 @@
                 <div class="input-wrapper"><label>CPU</label><input id="editCpu"></div>
                 <div class="input-wrapper"><label>RAM</label><input id="editRam"></div>
                 <div class="input-wrapper"><label>Storage</label><input id="editSsd"></div>
+                <div class="input-wrapper"><label>OS Installed</label><input id="editOs"></div>
                 <div class="input-wrapper"><label>Inspector</label><input id="editTeknisi"></div>
                 <div class="input-wrapper"><label>Score (0-100)</label><input id="editScore" type="number"></div>
                 <div class="input-wrapper"><label>Grade</label><input id="editGrade"></div>
@@ -328,13 +359,16 @@
         let allDataCache = [];
         let currentGradeFilter = 'ALL';
         const sections = [
-            { id: "phys", name: "Physical Body & Hinge", weight: 15, icon: "fa-laptop" },
-            { id: "disp", name: "Display / Screen Panel", weight: 20, icon: "fa-tv" },
-            { id: "kybd", name: "Keyboard Responsiveness", weight: 10, icon: "fa-keyboard" },
-            { id: "tp",   name: "Trackpad & Click Buttons", weight: 10, icon: "fa-mouse-pointer" },
-            { id: "port", name: "I/O Ports (USB, HDMI, Jack)", weight: 10, icon: "fa-plug" },
-            { id: "batt", name: "Battery Health & Cycle", weight: 15, icon: "fa-battery-three-quarters" },
-            { id: "perf", name: "System Performance & Heat", weight: 20, icon: "fa-microchip" }
+            { id: "phys", name: "Physical Body & Hinge", weight: 10, icon: "fa-laptop" },
+            { id: "disp", name: "Display / Screen Panel", weight: 15, icon: "fa-tv" },
+            { id: "kybd", name: "Keyboard & Backlight", weight: 10, icon: "fa-keyboard" },
+            { id: "tp",   name: "Trackpad & Click Buttons", weight: 5, icon: "fa-mouse-pointer" },
+            { id: "port", name: "I/O Ports & Connectivity", weight: 10, icon: "fa-plug" },
+            { id: "batt", name: "Battery Health & Cycle", weight: 10, icon: "fa-battery-three-quarters" },
+            { id: "cam",  name: "Webcam, Mic & Audio", weight: 10, icon: "fa-video" },
+            { id: "perf", name: "Performance & Stress Test", weight: 15, icon: "fa-microchip" },
+            { id: "cool", name: "Cooling Fan & Heat Dissipation", weight: 5, icon: "fa-wind" },
+            { id: "soft", name: "OS, Drivers & Software Integrity", weight: 10, icon: "fa-compact-disc" }
         ];
         const qcContainer = document.getElementById("dynamicQC");
         sections.forEach((s, idx) => {
@@ -376,6 +410,7 @@
                 cpu: document.getElementById("cpu").value,
                 ram: document.getElementById("ram").value,
                 ssd: document.getElementById("ssd").value,
+                os: document.getElementById("os").value,
                 teknisi: document.getElementById("teknisi").value,
                 tanggal: document.getElementById("tanggal").value,
                 createdAt: serverTimestamp()
@@ -425,6 +460,7 @@
             document.getElementById("editCpu").value = item.cpu;
             document.getElementById("editRam").value = item.ram;
             document.getElementById("editSsd").value = item.ssd;
+            document.getElementById("editOs").value = item.os || "";
             document.getElementById("editTeknisi").value = item.teknisi;
             document.getElementById("editScore").value = item.score;
             document.getElementById("editGrade").value = item.grade;
@@ -441,6 +477,7 @@
                     cpu: document.getElementById("editCpu").value,
                     ram: document.getElementById("editRam").value,
                     ssd: document.getElementById("editSsd").value,
+                    os: document.getElementById("editOs").value,
                     teknisi: document.getElementById("editTeknisi").value,
                     score: document.getElementById("editScore").value,
                     grade: document.getElementById("editGrade").value,
@@ -479,7 +516,7 @@
             doc.autoTable({
                 startY: 65, body: [
                     ["Brand", data.brand], ["Model", data.model], ["CPU", data.cpu],
-                    ["RAM", data.ram], ["Storage", data.ssd], ["Inspection Date", data.tanggal]
+                    ["RAM", data.ram], ["Storage", data.ssd], ["OS", data.os || "-"], ["Inspection Date", data.tanggal]
                 ], theme: 'grid', styles: { fontSize: 10, cellPadding: 5 }, 
                 columnStyles: { 0: { fontStyle: 'bold', fillColor: [248, 250, 252], cellWidth: 50 } }
             });
@@ -510,6 +547,7 @@
                 cpu: document.getElementById("cpu").value,
                 ram: document.getElementById("ram").value,
                 ssd: document.getElementById("ssd").value,
+                os: document.getElementById("os").value,
                 teknisi: document.getElementById("teknisi").value,
                 grade: document.getElementById("finalGrade").innerText,
                 score: document.getElementById("finalScore").innerText.split(':')[1].trim().split('/')[0].trim(),
@@ -524,6 +562,7 @@
                 cpu: document.getElementById("editCpu").value,
                 ram: document.getElementById("editRam").value,
                 ssd: document.getElementById("editSsd").value,
+                os: document.getElementById("editOs").value,
                 teknisi: document.getElementById("editTeknisi").value,
                 grade: document.getElementById("editGrade").value,
                 score: document.getElementById("editScore").value,
