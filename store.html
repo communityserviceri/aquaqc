@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLANTIS Store - Premium Certified Laptops</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        
+        /* UI Helper Classes */
+        .glass-header { background: rgba(241, 245, 249, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(226, 232, 240, 0.5); }
+        .product-card { transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 30px 60px -12px rgba(15, 23, 42, 0.15); }
+        
+        /* Brand Filter Pill Styling */
+        .brand-pill { transition: all 0.3s ease; border: 2px solid transparent; }
+        .brand-pill.active { background-color: #0ea5e9; color: white; box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3); border-color: #0ea5e9; }
+        .brand-pill:not(.active):hover { background-color: #e2e8f0; }
+
+        /* Custom Scrollbar for better UX */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animation */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+    </style>
+</head>
+<body class="min-h-screen antialiased">
+
+    <nav class="sticky top-0 z-50 glass-header">
+        <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-sky-600 rounded-xl flex items-center justify-center shadow-lg shadow-sky-100">
+                    <i class="fas fa-shield-virus text-white text-2xl"></i>
+                </div>
+                <span class="text-3xl font-extrabold tracking-tighter text-slate-950">ATLANTIS<span class="text-sky-600 font-black">.</span><span class="text-sky-600 text-2xl font-bold">Store</span></span>
+            </div>
+            <div class="flex items-center gap-2 bg-white px-2 py-2 rounded-full shadow-sm border border-slate-100">
+                <i class="fas fa-circle text-emerald-500 text-xs ml-2"></i>
+                <span id="count-ready" class="font-bold text-slate-700 text-sm">0 Unit</span>
+                <span class="text-sm text-slate-400 mr-2">Ready</span>
+            </div>
+        </div>
+    </nav>
+
+    <header class="max-w-7xl mx-auto px-6 py-12 text-center mt-6">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-slate-950 leading-tight tracking-tighter">
+            Temukan Laptop <br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-indigo-600">Impian Anda Di Sini.</span>
+        </h1>
+        <p class="mt-6 text-xl text-slate-500 max-w-2xl mx-auto font-medium">
+            Katalog real-time unit bersertifikat QC Atlantis. Transparan, jujur, dan bergaransi resmi toko.
+        </p>
+    </header>
+
+    <section class="max-w-7xl mx-auto px-6 mb-16">
+        <div class="bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-100 border border-slate-50 Space-y-6">
+            <div class="relative w-full">
+                <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                <input type="text" id="searchInput" placeholder="Cari model laptop, CPU, atau spesifikasi... (contoh: ThinkPad i7)" 
+                       class="w-full pl-16 pr-8 py-5 rounded-2xl bg-slate-50 border border-slate-100 focus:ring-4 focus:ring-sky-100 focus:bg-white outline-none transition text-lg shadow-inner">
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center pt-4 border-t border-slate-100">
+                <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto" id="brandPillContainer">
+                    <button onclick="setBrandFilter('ALL')" class="brand-pill active px-6 py-3 rounded-full text-sm font-bold bg-slate-100 text-slate-700 whitespace-nowrap">Semua</button>
+                    <button onclick="setBrandFilter('Apple')" class="brand-pill px-6 py-3 rounded-full text-sm font-bold bg-slate-100 text-slate-700 whitespace-nowrap">Apple</button>
+                    <button onclick="setBrandFilter('Lenovo')" class="brand-pill px-6 py-3 rounded-full text-sm font-bold bg-slate-100 text-slate-700 whitespace-nowrap">Lenovo</button>
+                    <button onclick="setBrandFilter('Asus')" class="brand-pill px-6 py-3 rounded-full text-sm font-bold bg-slate-100 text-slate-700 whitespace-nowrap">Asus</button>
+                    <button onclick="setBrandFilter('Dell')" class="brand-pill px-6 py-3 rounded-full text-sm font-bold bg-slate-100 text-slate-700 whitespace-nowrap">Dell</button>
+                </div>
+
+                <div class="flex items-center gap-3 bg-slate-50 px-5 py-3 rounded-xl border border-slate-100 w-full md:w-auto justify-between">
+                    <label class="text-sm font-bold text-slate-500">Tampilkan:</label>
+                    <select id="statusFilter" class="bg-transparent border-none font-bold text-sky-700 outline-none cursor-pointer text-sm">
+                        <option value="Ready" selected>Unit Tersedia</option>
+                        <option value="ALL">Semua Unit (Termasuk Sold)</option>
+                        <option value="Sold">Unit Terjual</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-6 pb-32">
+        <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 anim-ready">
+            <div class="animate-pulse bg-white rounded-3xl h-96 p-6 space-y-5 border border-slate-100">
+                <div class="h-48 bg-slate-100 rounded-2xl"></div>
+                <div class="h-6 bg-slate-200 rounded w-1/2"></div>
+                <div class="h-4 bg-slate-100 rounded w-full"></div>
+                <div class="h-10 bg-slate-100 rounded w-full mt-4"></div>
+            </div>
+             <div class="animate-pulse bg-white rounded-3xl h-96 p-6 space-y-5 border border-slate-100 hidden md:block">
+                <div class="h-48 bg-slate-100 rounded-2xl"></div>
+                <div class="h-6 bg-slate-200 rounded w-1/2"></div>
+                <div class="h-4 bg-slate-100 rounded w-full"></div>
+                <div class="h-10 bg-slate-100 rounded w-full mt-4"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="productModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm" onclick="handleOutsideClick(event)">
+        <div id="modalContainer" class="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl transition-all scale-95 opacity-0 duration-300 ease-out relative overflow-hidden">
+            
+            <button onclick="closeModal()" class="absolute top-6 right-6 z-30 bg-white/20 hover:bg-white text-slate-500 w-10 h-10 rounded-full transition flex items-center justify-center shadow-lg">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            
+            <div id="modalHeaderBg" class="h-44 bg-gradient-to-r from-sky-600 to-indigo-600 p-10 flex items-end relative overflow-hidden">
+                <div class="z-10">
+                    <span id="modalBrand" class="text-white/70 font-bold uppercase tracking-widest text-xs"></span>
+                    <h2 id="modalTitle" class="text-white text-3xl font-extrabold mt-1 tracking-tight"></h2>
+                </div>
+                <i class="fas fa-laptop absolute -right-10 -bottom-10 text-[180px] text-white/10 rotate-12"></i>
+            </div>
+
+            <div class="p-10">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <i class="fas fa-microchip text-sky-500 mb-2"></i>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Processor</p>
+                        <p id="modalCpu" class="text-xs font-bold text-slate-700 mt-1"></p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <i class="fas fa-memory text-sky-500 mb-2"></i>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Memory</p>
+                        <p id="modalRam" class="text-xs font-bold text-slate-700 mt-1"></p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <i class="fas fa-hdd text-sky-500 mb-2"></i>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Storage</p>
+                        <p id="modalSsd" class="text-xs font-bold text-slate-700 mt-1"></p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <i class="fas fa-shield-alt text-emerald-500 mb-2"></i>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">QC Integrity</p>
+                        <p id="modalGrade" class="text-xs font-bold text-emerald-700 mt-1"></p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-8 border-t border-slate-100">
+                    <div>
+                        <p class="text-sm font-bold text-slate-400">Harga Nett Atlantis</p>
+                        <p id="modalPrice" class="text-4xl font-black text-slate-950 tracking-tight"></p>
+                    </div>
+                    <button id="modalActionBtn" class="flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-bold text-lg transition shadow-lg w-full md:w-auto">
+                        </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxZvpKrQ236bCTOLSzoMrHRR8BINTI-Sw",
+            authDomain: "atlantiscorp-af211.firebaseapp.com",
+            projectId: "atlantiscorp-af211",
+            storageBucket: "atlantiscorp-af211.firebasestorage.app",
+            messagingSenderId: "36612462515",
+            appId: "1:36612462515:web:7683c3b686d308450addc6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let allProducts = [];
+        let currentBrandFilter = 'ALL';
+
+        async function init() {
+            try {
+                // Fetch data, ordering by date
+                const snap = await getDocs(query(collection(db, "inspections"), orderBy("createdAt", "desc")));
+                allProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Bug fix: Ensure status is treated as 'Ready' if missing/undefined
+                allProducts.forEach(p => { if (!p.status) p.status = 'Ready'; });
+
+                updateHeaderCount();
+                applyFilters(); // Initial render
+            } catch (err) {
+                console.error("Database Error:", err);
+                document.getElementById('catalogGrid').innerHTML = `
+                    <div class="col-span-full text-center py-20 text-red-500 bg-white rounded-3xl border border-red-100">
+                        <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                        <p class="font-bold">Gagal terhubung ke Cloud Database.</p>
+                        <p class="text-sm mt-1">Silakan refresh halaman atau coba lagi nanti.</p>
+                    </div>`;
+            }
+        }
+
+        function updateHeaderCount() {
+            // FIX BUG: Only count units with status 'Ready'
+            const readyCount = allProducts.filter(p => p.status === 'Ready').length;
+            document.getElementById('count-ready').innerText = `${readyCount} Unit`;
+        }
+
+        window.setBrandFilter = (brand) => {
+            currentBrandFilter = brand;
+            
+            // UI UX: Update active pill state
+            document.querySelectorAll('#brandPillContainer .brand-pill').forEach(pill => {
+                pill.classList.remove('active');
+                if(pill.innerText === brand || (brand === 'ALL' && pill.innerText === 'Semua')) {
+                    pill.classList.add('active');
+                }
+            });
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusTerm = document.getElementById('statusFilter').value;
+
+            const filtered = allProducts.filter(p => {
+                // Bug fix handled in init(), status is never null here
+                const matchesSearch = !searchTerm || p.model.toLowerCase().includes(searchTerm) || p.brand.toLowerCase().includes(searchTerm) || p.cpu.toLowerCase().includes(searchTerm);
+                const matchesBrand = currentBrandFilter === 'ALL' || p.brand === currentBrandFilter;
+                const matchesStatus = statusTerm === 'ALL' || p.status === statusTerm;
+                
+                return matchesSearch && matchesBrand && matchesStatus;
+            });
+
+            renderGrid(filtered);
+        }
+
+        function renderGrid(items) {
+            const grid = document.getElementById('catalogGrid');
+            if (items.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-24 text-slate-500 bg-white rounded-3xl border border-slate-100 animate-fadeIn">
+                        <i class="fas fa-search-minus text-5xl mb-6 text-slate-300"></i>
+                        <p class="font-bold text-lg">Unit Tidak Ditemukan</p>
+                        <p class="text-sm mt-1">Coba ubah filter pencarian atau pilih brand lain.</p>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = items.map((p, index) => {
+                const isSold = p.status === 'Sold';
+                // Delay animation based on index
+                const delay = index * 50; 
+                
+                return `
+                <div class="product-card group relative bg-white rounded-[2.5rem] p-7 border border-slate-100 shadow-xl shadow-slate-50 cursor-pointer overflow-hidden animate-fadeIn" 
+                     style="animation-delay: ${delay}ms" onclick="openModal('${p.id}')">
+                    
+                    ${isSold ? `
+                        <div class="absolute top-6 right-6 z-20 bg-slate-100 text-slate-500 px-4 py-1 rounded-full font-bold text-xs flex items-center gap-2">
+                            <i class="fas fa-archive"></i> Unit Sold
+                        </div>
+                    ` : `
+                        <div class="absolute top-6 right-6 z-20 bg-emerald-50 text-emerald-600 px-4 py-1 rounded-full font-bold text-xs flex items-center gap-1.5">
+                            <i class="fas fa-circle text-[8px]"></i> Ready Stock
+                        </div>
+                    `}
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-xs font-black bg-slate-100 px-4 py-1.5 rounded-full text-slate-600 uppercase tracking-widest">${p.brand}</span>
+                    </div>
+
+                    <div class="h-44 rounded-3xl flex items-center justify-center transition mb-6 ${isSold ? 'bg-slate-50' : 'bg-sky-50 group-hover:bg-sky-100' }">
+                        <i class="fas fa-laptop text-7xl ${isSold ? 'text-slate-200' : 'text-sky-200 group-hover:text-sky-300'}"></i>
+                    </div>
+
+                    <h3 class="text-xl font-extrabold text-slate-900 leading-tight ${isSold ? 'opacity-60' : ''}">${p.model}</h3>
+                    <p class="text-xs text-slate-400 font-medium mt-1.5 line-clamp-1">${p.cpu} / ${p.ram} / ${p.ssd}</p>
+                    
+                    <div class="mt-8 pt-7 border-t border-slate-100 flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase leading-none">Harga Net</p>
+                            <p class="text-xl font-black ${isSold ? 'text-slate-400' : 'text-slate-950'} mt-1">
+                                Rp ${(parseInt(p.price) || 0).toLocaleString('id-ID')}
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl ${isSold ? 'bg-slate-200 text-slate-400' : 'bg-sky-600 text-white shadow-lg shadow-sky-100'} flex items-center justify-center transition group-hover:scale-105">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        window.openModal = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if(!p) return;
+
+            const isSold = p.status === 'Sold';
+            const modal = document.getElementById('productModal');
+            const container = document.getElementById('modalContainer');
+            
+            // Fill Data
+            document.getElementById('modalBrand').innerText = p.brand;
+            document.getElementById('modalTitle').innerText = p.model;
+            document.getElementById('modalCpu').innerText = p.cpu;
+            document.getElementById('modalRam').innerText = p.ram;
+            document.getElementById('modalSsd').innerText = p.ssd;
+            document.getElementById('modalGrade').innerText = `Grade ${p.grade}`;
+            document.getElementById('modalPrice').innerText = `Rp ${(parseInt(p.price) || 0).toLocaleString('id-ID')}`;
+            
+            // UI Update berdasarkan status
+            const header = document.getElementById('modalHeaderBg');
+            const actionBtn = document.getElementById('modalActionBtn');
+
+            if (isSold) {
+                header.className = "h-44 bg-slate-500 p-10 flex items-end relative overflow-hidden";
+                document.getElementById('modalGrade').parentElement.className = "bg-slate-50 p-4 rounded-xl border border-slate-100"; // Emerald box to gray
+                document.getElementById('modalGrade').className = "text-xs font-bold text-slate-500 mt-1";
+                
+                actionBtn.className = "bg-slate-100 text-slate-400 px-10 py-5 rounded-2xl font-bold text-lg w-full md:w-auto cursor-not-allowed flex items-center gap-2";
+                actionBtn.innerHTML = `<i class="fas fa-times-circle"></i> Unit Sudah Laku`;
+                actionBtn.setAttribute('onclick', `window.open('https://wa.me/6282191847167?text=Halo Atlantis, saya tertarik dengan ${p.brand} ${p.model} yang ada di katalog. Apakah unit ini masih ready?')`);
+            } else {
+                header.className = "h-44 bg-gradient-to-r from-sky-600 to-indigo-600 p-10 flex items-end relative overflow-hidden";
+                document.getElementById('modalGrade').parentElement.className = "bg-emerald-50 p-4 rounded-xl border border-emerald-100"; // Gray back to emerald
+                document.getElementById('modalGrade').className = "text-xs font-bold text-emerald-700 mt-1";
+
+                actionBtn.className = "bg-sky-600 text-white hover:bg-sky-700 px-10 py-5 rounded-2xl font-bold text-lg shadow-sky-100 w-full md:w-auto flex items-center gap-2";
+                actionBtn.innerHTML = `<i class="fab fa-whatsapp"></i> Tanya Admin via WA`;
+                actionBtn.setAttribute('onclick', `window.open('https://wa.me/62xxxxxxxxxx?text=Halo Atlantis, saya tertarik dengan ${p.brand} ${p.model} harga Rp ${parseInt(p.price).toLocaleString('id-ID')}')`);
+            }
+
+            // Show Modal with animation
+            modal.classList.replace('hidden', 'flex');
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        window.closeModal = () => {
+            const modal = document.getElementById('productModal');
+            const container = document.getElementById('modalContainer');
+            
+            container.classList.add('scale-95', 'opacity-0');
+            container.classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                modal.classList.replace('flex', 'hidden');
+            }, 300); // Wait for transition
+        }
+
+        // UX: Close on outside click
+        window.handleOutsideClick = (event) => {
+            if(event.target.id === 'productModal') closeModal();
+        }
+
+        // Listeners
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+
+        init();
+    </script>
+</body>
+</html>
